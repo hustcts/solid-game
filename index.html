@@ -119,17 +119,18 @@
         /* 底部选择区 */
         #selection-zone {
             position: absolute;
-            bottom: 10px;
+            bottom: 0px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 15px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
             z-index: 100;
             pointer-events: auto;
+            max-width: 95%;
         }
 
         .shape-option {
@@ -299,15 +300,16 @@
             }
 
             #selection-zone {
-                bottom: 5px;
-                padding: 8px;
+                bottom: 0px;
+                padding: 10px;
                 gap: 8px;
+                max-width: 100%;
             }
 
             .shape-option {
-                width: 55px;
-                height: 55px;
-                font-size: 26px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
             }
 
             #target-zone {

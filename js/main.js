@@ -226,7 +226,7 @@ function createOptionShapes(optionTypes) {
         const mesh = Shapes.createByType(type, shapeData.color);
         
         // 手机端调整位置，让几何体在屏幕中央
-        const yPos = isMobile ? 0.5 : -0.5;  // 统一高度
+        const yPos = isMobile ? 1.5 : -0.5;  // 统一高度
         const zPos = 2;         // 手机端稍远
         const scale = isMobile ? 0.7 : 0.8;    // 手机端稍小
         
@@ -280,6 +280,13 @@ let dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
 // 鼠标/触摸事件处理
 function onMouseDown(event) {
+    // 如果点击的是 UI 区域，不处理
+    if (event.target.closest('#selection-zone') || 
+        event.target.closest('#header') ||
+        event.target.closest('#hint-text')) {
+        return;
+    }
+    
     event.preventDefault();
     
     // 获取鼠标/触摸位置
@@ -322,7 +329,9 @@ function onMouseDown(event) {
         // 放大效果
         selectedMesh.scale.multiplyScalar(1.2);
         
-        console.log('Selected:', selectedMesh.userData.shapeType);
+        console.log('✓ Selected:', selectedMesh.userData.shapeType);
+    } else {
+        console.log('✗ No intersect, mouse:', mouse.x, mouse.y);
     }
 }
 
@@ -521,20 +530,28 @@ function setupEventListeners() {
 
 // 触摸事件处理
 function handleTouchStart(event) {
+    // 如果点击的是 UI 区域，不处理
+    if (event.touches[0].target.closest('#selection-zone')) {
+        return;
+    }
+    
     if (event.touches.length === 1) {
         onMouseDown(event.touches[0]);
     }
 }
 
 function handleTouchMove(event) {
-    if (event.touches.length === 1) {
+    if (isDragging && event.touches.length === 1) {
         event.preventDefault(); // 防止滚动
         onMouseMove(event.touches[0]);
     }
 }
 
 function handleTouchEnd(event) {
-    onMouseUp(event);
+    if (isDragging) {
+        event.preventDefault();
+        onMouseUp(event);
+    }
 }
 
 // 窗口大小调整
