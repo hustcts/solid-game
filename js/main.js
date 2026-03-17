@@ -40,6 +40,11 @@ function init() {
     // 添加到容器
     const container = document.getElementById('canvas-container');
     container.appendChild(renderer.domElement);
+    
+    // 调试信息（仅开发时）
+    console.log('Three.js initialized');
+    console.log('Screen size:', window.innerWidth, 'x', window.innerHeight);
+    console.log('Camera position:', camera.position);
 
     // 添加轨道控制器
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -126,6 +131,12 @@ function loadLevel(levelNum) {
 
     // 创建选项几何体
     createOptionShapes(currentLevelData.options);
+    
+    // 调试：输出几何体信息
+    console.log('Created shapes:', optionMeshes.length);
+    optionMeshes.forEach((mesh, i) => {
+        console.log(`Shape ${i}:`, mesh.userData.shapeType, 'at', mesh.position);
+    });
 
     // 更新 UI
     game.updateUI();
@@ -198,6 +209,7 @@ function createOptionShapes(optionTypes) {
         mesh.receiveShadow = true;
         mesh.userData.isOption = true;
         mesh.userData.shapeType = type;
+        mesh.userData.originalZ = zPos; // 保存原始 Z 位置
 
         scene.add(mesh);
         optionMeshes.push(mesh);
@@ -240,9 +252,15 @@ let dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 function onMouseDown(event) {
     event.preventDefault();
     
-    // 获取鼠标位置
-    const clientX = event.clientX || (event.touches && event.touches[0].clientX);
-    const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+    // 获取鼠标/触摸位置
+    let clientX, clientY;
+    if (event.touches && event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
     
     if (!clientX || !clientY) return;
     
@@ -267,9 +285,14 @@ function onMouseDown(event) {
         const btn = document.querySelector(`[data-shape-type="${selectedMesh.userData.shapeType}"]`);
         if (btn) btn.classList.add('selected');
         
-        // 提升几何体
-        selectedMesh.position.z += 0.5;
+        // 提升几何体（向相机方向移动）
+        selectedMesh.position.z += 1;
         selectedMesh.material.emissive = new THREE.Color(0x444444);
+        
+        // 放大效果
+        selectedMesh.scale.multiplyScalar(1.2);
+        
+        console.log('Selected:', selectedMesh.userData.shapeType);
     }
 }
 
@@ -278,8 +301,14 @@ function onMouseMove(event) {
     
     event.preventDefault();
     
-    const clientX = event.clientX || (event.touches && event.touches[0].clientX);
-    const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+    let clientX, clientY;
+    if (event.touches && event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
     
     if (!clientX || !clientY) return;
     
@@ -288,11 +317,18 @@ function onMouseMove(event) {
     
     raycaster.setFromCamera(mouse, camera);
     
-    const target = new THREE.Vector3();
-    raycaster.ray.intersectPlane(dragPlane, target);
+    // 根据几何体原始深度调整拖拽平面
+    const originalZ = selectedMesh.userData.originalZ || 2;
+    dragPlane.constant = -originalZ;
     
-    selectedMesh.position.x = target.x;
-    selectedMesh.position.y = target.y + 0.5;
+    const target = new THREE.Vector3();
+    const intersects = raycaster.ray.intersectPlane(dragPlane, target);
+    
+    if (intersects) {
+        // 限制移动范围，避免拖出屏幕
+        selectedMesh.position.x = THREE.MathUtils.clamp(target.x, -5, 5);
+        selectedMesh.position.y = THREE.MathUtils.clamp(target.y, -2, 3);
+    }
 }
 
 function onMouseUp(event) {
@@ -494,8 +530,28 @@ function handleTouchMove(event) {
 }
 
 // 动画循环
+let frameCount = 0;
+let lastTime = performance.now();
+
 function animate() {
     requestAnimationFrame(animate);
+
+    // FPS 计算
+    frameCount++;
+    const now = performance.now();
+    if (now - lastTime >= 1000) {
+        const fps = frameCount;
+        frameCount = 0;
+        lastTime = now;
+        
+        // 更新调试信息
+        const debugEl = document.getElementById('debug-info');
+        if (debugEl && debugEl.style.display !== 'none') {
+            document.getElementById('debug-screen').textContent = `${window.innerWidth}x${window.innerHeight}`;
+            document.getElementById('debug-shapes').textContent = optionMeshes.length;
+            document.getElementById('debug-fps').textContent = fps;
+        }
+    }
 
     // 更新控制器
     controls.update();
@@ -513,6 +569,15 @@ function animate() {
     // 渲染场景
     renderer.render(scene, camera);
 }
+
+// 切换调试面板（双击屏幕）
+let lastTap = 0;
+document.addEventListener('dblclick', () => {
+    const debugEl = document.getElementById('debug-info');
+    if (debugEl) {
+        debugEl.style.display = debugEl.style.display === 'none' ? 'block' : 'none';
+    }
+});
 
 // 页面加载完成后初始化
 window.addEventListener('DOMContentLoaded', init);
