@@ -20,11 +20,11 @@ function init() {
     // 创建相机
     camera = new THREE.PerspectiveCamera(
         75,
-        window.innerWidth / window.innerHeight,
+        window.innerWidth / (window.innerHeight - 80),
         0.1,
         1000
     );
-    camera.position.set(0, 2, 6);
+    camera.position.set(0, 3, 8);
     camera.lookAt(0, 0, 0);
 
     // 创建渲染器
@@ -155,7 +155,11 @@ function createTargetShape(shapeType) {
 
     targetMesh = Shapes.createByType(shapeType, 0x333333);
     targetMesh.position.set(0, 0, 0);
-    targetMesh.scale.set(1.2, 1.2, 1.2);
+    
+    // 手机端放大目标几何体，更容易看到
+    const isMobile = window.innerWidth < 768;
+    const scale = isMobile ? 1.5 : 1.2;
+    targetMesh.scale.set(scale, scale, scale);
     
     // 设置为半透明影子效果
     targetMesh.material.transparent = true;
@@ -171,7 +175,10 @@ function createTargetShape(shapeType) {
 // 创建选项几何体
 function createOptionShapes(optionTypes) {
     const allShapes = Shapes.getAllShapes();
-    const spacing = 2.5;
+    
+    // 根据屏幕宽度调整间距
+    const isMobile = window.innerWidth < 768;
+    const spacing = isMobile ? 1.8 : 2.5;
     const startX = -((optionTypes.length - 1) * spacing) / 2;
 
     optionTypes.forEach((type, index) => {
@@ -179,8 +186,14 @@ function createOptionShapes(optionTypes) {
         if (!shapeData) return;
 
         const mesh = Shapes.createByType(type, shapeData.color);
-        mesh.position.set(startX + index * spacing, -0.5, 2);
-        mesh.scale.set(0.8, 0.8, 0.8);
+        
+        // 手机端调整位置，让几何体更靠下、更明显
+        const yPos = isMobile ? -1 : -0.5;
+        const zPos = isMobile ? 3 : 2;
+        const scale = isMobile ? 0.6 : 0.8;
+        
+        mesh.position.set(startX + index * spacing, yPos, zPos);
+        mesh.scale.set(scale, scale, scale);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.userData.isOption = true;
@@ -460,9 +473,15 @@ function handleTouchEnd(event) {
 
 // 窗口大小调整
 function onWindowResize() {
-    camera.aspect = window.innerWidth / (window.innerHeight - 80);
+    const headerHeight = window.innerWidth < 768 ? 60 : 80;
+    camera.aspect = window.innerWidth / (window.innerHeight - headerHeight);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight - 80);
+    renderer.setSize(window.innerWidth, window.innerHeight - headerHeight);
+    
+    // 手机端重新加载关卡以调整几何体位置
+    if (window.innerWidth < 768) {
+        loadLevel(game.getLevel());
+    }
 }
 
 // 触摸事件处理

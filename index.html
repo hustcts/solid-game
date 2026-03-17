@@ -72,23 +72,26 @@
             width: 100%;
             height: calc(100vh - 80px);
             margin-top: 80px;
+            position: relative;
+            z-index: 1;
         }
 
         /* 目标区域（影子） */
         #target-zone {
             position: absolute;
-            top: 50%;
+            top: 45%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            border: 4px dashed rgba(255, 255, 255, 0.5);
+            width: 280px;
+            height: 280px;
+            border: 4px dashed rgba(255, 255, 255, 0.6);
             border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             pointer-events: none;
+            z-index: 50;
         }
 
         #target-label {
@@ -258,12 +261,12 @@
         @media (max-width: 768px) {
             #header {
                 height: 60px;
-                padding: 0 15px;
+                padding: 0 10px;
             }
 
             .level-badge, .score-display {
-                padding: 8px 15px;
-                font-size: 16px;
+                padding: 6px 12px;
+                font-size: 14px;
             }
 
             #canvas-container {
@@ -271,20 +274,44 @@
                 margin-top: 60px;
             }
 
+            #hint-text {
+                top: 80px;
+                font-size: 14px;
+                padding: 8px 15px;
+                max-width: 90%;
+                white-space: normal;
+            }
+
             #selection-zone {
-                bottom: 15px;
-                padding: 15px;
+                bottom: 10px;
+                padding: 10px;
+                gap: 10px;
             }
 
             .shape-option {
-                width: 70px;
-                height: 70px;
-                font-size: 30px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
             }
 
             #target-zone {
-                width: 200px;
-                height: 200px;
+                width: 220px;
+                height: 220px;
+                top: 40%;
+            }
+
+            #target-label {
+                font-size: 16px;
+            }
+
+            #progress-container {
+                top: 80px;
+                right: 10px;
+                padding: 10px;
+            }
+
+            #progress-bar {
+                width: 100px;
             }
         }
     </style>
