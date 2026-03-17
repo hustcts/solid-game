@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Three.js 测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            overflow: hidden; 
+            touch-action: none;
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #canvas-container canvas {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>🔴 如果看到红球 = Three.js 正常</div>
+        <div>⚪ 如果看到白球 = 渲染正常</div>
+        <div>❌ 如果看不到 = 有问题</div>
+        <hr style="margin: 10px 0; border: none; border-top: 1px solid #666;">
+        <div id="debug">初始化中...</div>
+    </div>
+    
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const debug = document.getElementById('debug');
+        const container = document.getElementById('canvas-container');
+        
+        // 检查容器
+        debug.textContent = '1. 容器存在：' + (container ? '✅' : '❌') + '\n';
+        debug.textContent += '2. 容器尺寸：' + container.clientWidth + 'x' + container.clientHeight + '\n';
+        
+        // 创建场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x202040);
+        debug.textContent += '3. 场景创建：✅\n';
+        
+        // 创建相机
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 5;
+        debug.textContent += '4. 相机创建：✅\n';
+        
+        // 创建渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        debug.textContent += '5. 渲染器创建：✅\n';
+        debug.textContent += '6. WebGL 版本：' + renderer.capabilities.glVersion + '\n';
+        
+        // 添加到 DOM
+        container.appendChild(renderer.domElement);
+        debug.textContent += '7. Canvas 已添加：✅\n';
+        
+        // 创建红色测试球
+        const redSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(1.5, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0xff0000 })
+        );
+        redSphere.position.z = -2;
+        scene.add(redSphere);
+        debug.textContent += '8. 红球已添加：✅\n';
+        
+        // 创建白色测试球
+        const whiteSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0xffffff })
+        );
+        whiteSphere.position.set(2.5, 0, -2);
+        scene.add(whiteSphere);
+        debug.textContent += '9. 白球已添加：✅\n';
+        
+        // 添加光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+        debug.textContent += '10. 光源已添加：✅\n';
+        
+        debug.textContent += '\n🎉 渲染初始化完成！\n';
+        
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            redSphere.rotation.y += 0.02;
+            whiteSphere.rotation.y += 0.02;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        debug.textContent += '11. 动画循环：✅\n';
+        
+        // 窗口调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        debug.textContent += '\n📱 屏幕：' + window.innerWidth + 'x' + window.innerHeight;
+        debug.textContent += '\n🖥️ 设备像素比：' + window.devicePixelRatio;
+    </script>
+</body>
+</html>
