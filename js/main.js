@@ -66,10 +66,11 @@ function init() {
     console.log('Camera lookAt:', camera.lookAt.toString());
     console.log('Is mobile:', window.innerWidth < 768);
 
-    // 添加轨道控制器
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    // 添加轨道控制器（使用简化版）
+    controls = new THREE.SimpleControls(camera, renderer.domElement);
+    controls.enableDamping = function() {};
     controls.dampingFactor = 0.05;
+    controls.update = function() { return true; };
     controls.minDistance = 3;
     controls.maxDistance = 10;
     controls.enablePan = false;
