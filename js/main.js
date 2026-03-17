@@ -18,14 +18,25 @@ function init() {
     scene.background = new THREE.Color(0xf0f4f8);
 
     // 创建相机
+    const isMobile = window.innerWidth < 768;
+    const aspect = window.innerWidth / (window.innerHeight - (isMobile ? 60 : 80));
+    
     camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / (window.innerHeight - 80),
+        isMobile ? 60 : 75,  // 手机端视野更小
+        aspect,
         0.1,
         1000
     );
-    camera.position.set(0, 3, 8);
+    
+    // 相机位置：手机端让相机更靠后上方，俯视几何体
+    if (isMobile) {
+        camera.position.set(0, 5, 10);
+    } else {
+        camera.position.set(0, 3, 8);
+    }
     camera.lookAt(0, 0, 0);
+    
+    console.log('Camera setup - FOV:', camera.fov, 'Aspect:', camera.aspect, 'Position:', camera.position);
 
     // 创建渲染器
     renderer = new THREE.WebGLRenderer({ 
@@ -39,12 +50,19 @@ function init() {
 
     // 添加到容器
     const container = document.getElementById('canvas-container');
+    if (!container) {
+        console.error('Canvas container not found!');
+        return;
+    }
     container.appendChild(renderer.domElement);
     
-    // 调试信息（仅开发时）
-    console.log('Three.js initialized');
-    console.log('Screen size:', window.innerWidth, 'x', window.innerHeight);
-    console.log('Camera position:', camera.position);
+    // 详细调试信息
+    console.log('=== Game Init ===');
+    console.log('Screen:', window.innerWidth, 'x', window.innerHeight);
+    console.log('Container:', container.clientWidth, 'x', container.clientHeight);
+    console.log('Camera:', camera.position);
+    console.log('Camera lookAt:', camera.lookAt.toString());
+    console.log('Is mobile:', window.innerWidth < 768);
 
     // 添加轨道控制器
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -62,6 +80,19 @@ function init() {
 
     // 加载第一关
     loadLevel(1);
+    
+    // 测试：添加一个可见的红色球体确认渲染正常（10 秒后移除）
+    const testSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 32, 32),
+        new THREE.MeshPhongMaterial({ color: 0xff0000 })
+    );
+    testSphere.position.set(0, 0, 5);
+    scene.add(testSphere);
+    console.log('=== TEST SPHERE ADDED ===');
+    setTimeout(() => {
+        scene.remove(testSphere);
+        console.log('Test sphere removed');
+    }, 10000);
 
     // 设置事件监听
     setupEventListeners();
@@ -133,10 +164,17 @@ function loadLevel(levelNum) {
     createOptionShapes(currentLevelData.options);
     
     // 调试：输出几何体信息
+    console.log('=== Level Loaded ===');
+    console.log('Target:', currentLevelData.target);
+    console.log('Options:', currentLevelData.options);
     console.log('Created shapes:', optionMeshes.length);
     optionMeshes.forEach((mesh, i) => {
-        console.log(`Shape ${i}:`, mesh.userData.shapeType, 'at', mesh.position);
+        console.log(`Shape ${i}:`, mesh.userData.shapeType, 
+            'pos:', mesh.position, 
+            'scale:', mesh.scale,
+            'visible:', mesh.visible);
     });
+    console.log('Scene children:', scene.children.length);
 
     // 更新 UI
     game.updateUI();
@@ -199,9 +237,9 @@ function createOptionShapes(optionTypes) {
         const mesh = Shapes.createByType(type, shapeData.color);
         
         // 手机端调整位置，让几何体更靠下、更明显
-        const yPos = isMobile ? -1 : -0.5;
-        const zPos = isMobile ? 3 : 2;
-        const scale = isMobile ? 0.6 : 0.8;
+        const yPos = isMobile ? -2 : -0.5;
+        const zPos = isMobile ? 5 : 2;
+        const scale = isMobile ? 0.8 : 0.8;
         
         mesh.position.set(startX + index * spacing, yPos, zPos);
         mesh.scale.set(scale, scale, scale);
