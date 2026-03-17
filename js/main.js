@@ -226,8 +226,8 @@ function createOptionShapes(optionTypes) {
         const mesh = Shapes.createByType(type, shapeData.color);
         
         // 手机端调整位置，让几何体在屏幕中央
-        const yPos = isMobile ? -0.5 : -0.5;  // 统一高度
-        const zPos = isMobile ? 3 : 2;         // 手机端稍远
+        const yPos = isMobile ? 0.5 : -0.5;  // 统一高度
+        const zPos = 2;         // 手机端稍远
         const scale = isMobile ? 0.7 : 0.8;    // 手机端稍小
         
         mesh.position.set(startX + index * spacing, yPos, zPos);
