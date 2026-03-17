@@ -138,6 +138,22 @@
             transform: scale(1.15);
         }
 
+        /* 提示文字 */
+        #hint-text {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            color: #666;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 90;
+            white-space: nowrap;
+        }
+
         /* 消息提示 */
         #message {
             position: absolute;
@@ -300,6 +316,9 @@
         <div id="target-zone">
             <div id="target-label">🎯 把正确的几何体<br>拖到这里！</div>
         </div>
+        
+        <!-- 提示文字 -->
+        <div id="hint-text">💡 提示：可以直接拖拽 3D 几何体，或者点击下方的按钮</div>
 
         <!-- 底部选择区 -->
         <div id="selection-zone">

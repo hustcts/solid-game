@@ -216,7 +216,107 @@ function createSelectionButtons(optionTypes) {
     });
 }
 
-// 选择几何体
+// 射线检测器（用于点击和拖拽）
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let selectedMesh = null;
+let isDragging = false;
+let dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+// 鼠标/触摸事件处理
+function onMouseDown(event) {
+    event.preventDefault();
+    
+    // 获取鼠标位置
+    const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+    const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+    
+    if (!clientX || !clientY) return;
+    
+    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+    
+    raycaster.setFromCamera(mouse, camera);
+    
+    // 检测是否点击了几何体
+    const intersects = raycaster.intersectObjects(optionMeshes);
+    
+    if (intersects.length > 0) {
+        selectedMesh = intersects[0].object;
+        isDragging = true;
+        
+        // 高亮选中的几何体
+        document.querySelectorAll('.shape-option').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // 找到对应的按钮并高亮
+        const btn = document.querySelector(`[data-shape-type="${selectedMesh.userData.shapeType}"]`);
+        if (btn) btn.classList.add('selected');
+        
+        // 提升几何体
+        selectedMesh.position.z += 0.5;
+        selectedMesh.material.emissive = new THREE.Color(0x444444);
+    }
+}
+
+function onMouseMove(event) {
+    if (!isDragging || !selectedMesh) return;
+    
+    event.preventDefault();
+    
+    const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+    const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+    
+    if (!clientX || !clientY) return;
+    
+    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+    
+    raycaster.setFromCamera(mouse, camera);
+    
+    const target = new THREE.Vector3();
+    raycaster.ray.intersectPlane(dragPlane, target);
+    
+    selectedMesh.position.x = target.x;
+    selectedMesh.position.y = target.y + 0.5;
+}
+
+function onMouseUp(event) {
+    if (!isDragging || !selectedMesh) return;
+    
+    isDragging = false;
+    
+    // 检查是否在目标区域内
+    const distance = selectedMesh.position.distanceTo(new THREE.Vector3(0, 0, 0));
+    
+    if (distance < 1.5) {
+        // 在目标区域内，检查答案
+        checkAnswer(selectedMesh.userData.shapeType);
+    }
+    
+    // 恢复位置
+    resetMeshPosition(selectedMesh);
+    selectedMesh = null;
+}
+
+function resetMeshPosition(mesh) {
+    mesh.position.z = 2;
+    mesh.position.y = -0.5;
+    mesh.material.emissive = new THREE.Color(0x000000);
+    
+    // 找到原始 X 位置
+    const allShapes = Shapes.getAllShapes();
+    const optionTypes = currentLevelData ? currentLevelData.options : [];
+    const index = optionTypes.indexOf(mesh.userData.shapeType);
+    if (index >= 0) {
+        const spacing = 2.5;
+        const startX = -((optionTypes.length - 1) * spacing) / 2;
+        mesh.position.x = startX + index * spacing;
+    }
+}
+
+// 选择几何体（兼容旧版按钮点击）
 function selectShape(shapeType, buttonElement) {
     // 移除其他按钮的选中状态
     document.querySelectorAll('.shape-option').forEach(btn => {
@@ -329,9 +429,33 @@ function setupEventListeners() {
     // 窗口大小调整
     window.addEventListener('resize', onWindowResize);
 
+    // 鼠标拖拽
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    
     // 触摸支持
     document.addEventListener('touchstart', handleTouchStart, { passive: false });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
+
+// 触摸事件处理
+function handleTouchStart(event) {
+    if (event.touches.length === 1) {
+        onMouseDown(event.touches[0]);
+    }
+}
+
+function handleTouchMove(event) {
+    if (event.touches.length === 1) {
+        event.preventDefault(); // 防止滚动
+        onMouseMove(event.touches[0]);
+    }
+}
+
+function handleTouchEnd(event) {
+    onMouseUp(event);
 }
 
 // 窗口大小调整
