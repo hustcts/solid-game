@@ -19,24 +19,26 @@ function init() {
 
     // 创建相机
     const isMobile = window.innerWidth < 768;
-    const aspect = window.innerWidth / (window.innerHeight - (isMobile ? 60 : 80));
+    const headerHeight = isMobile ? 60 : 80;
+    const canvasHeight = window.innerHeight - headerHeight;
+    const aspect = window.innerWidth / canvasHeight;
     
     camera = new THREE.PerspectiveCamera(
-        isMobile ? 60 : 75,  // 手机端视野更小
+        isMobile ? 50 : 75,  // 手机端视野更小，避免变形
         aspect,
         0.1,
         1000
     );
     
-    // 相机位置：手机端让相机更靠后上方，俯视几何体
+    // 相机位置：手机端让相机正对几何体区域
     if (isMobile) {
-        camera.position.set(0, 5, 10);
+        camera.position.set(0, 2, 8);  // 降低高度，正对
     } else {
         camera.position.set(0, 3, 8);
     }
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, -0.5, 0);  // 看向几何体所在区域
     
-    console.log('Camera setup - FOV:', camera.fov, 'Aspect:', camera.aspect, 'Position:', camera.position);
+    console.log('Camera - FOV:', camera.fov, 'Aspect:', aspect, 'Pos:', camera.position);
 
     // 创建渲染器
     renderer = new THREE.WebGLRenderer({ 
@@ -80,19 +82,6 @@ function init() {
 
     // 加载第一关
     loadLevel(1);
-    
-    // 测试：添加一个可见的红色球体确认渲染正常（10 秒后移除）
-    const testSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(1, 32, 32),
-        new THREE.MeshPhongMaterial({ color: 0xff0000 })
-    );
-    testSphere.position.set(0, 0, 5);
-    scene.add(testSphere);
-    console.log('=== TEST SPHERE ADDED ===');
-    setTimeout(() => {
-        scene.remove(testSphere);
-        console.log('Test sphere removed');
-    }, 10000);
 
     // 设置事件监听
     setupEventListeners();
@@ -236,10 +225,10 @@ function createOptionShapes(optionTypes) {
 
         const mesh = Shapes.createByType(type, shapeData.color);
         
-        // 手机端调整位置，让几何体更靠下、更明显
-        const yPos = isMobile ? -2 : -0.5;
-        const zPos = isMobile ? 5 : 2;
-        const scale = isMobile ? 0.8 : 0.8;
+        // 手机端调整位置，让几何体在屏幕中央
+        const yPos = isMobile ? -0.5 : -0.5;  // 统一高度
+        const zPos = isMobile ? 3 : 2;         // 手机端稍远
+        const scale = isMobile ? 0.7 : 0.8;    // 手机端稍小
         
         mesh.position.set(startX + index * spacing, yPos, zPos);
         mesh.scale.set(scale, scale, scale);
@@ -247,7 +236,10 @@ function createOptionShapes(optionTypes) {
         mesh.receiveShadow = true;
         mesh.userData.isOption = true;
         mesh.userData.shapeType = type;
-        mesh.userData.originalZ = zPos; // 保存原始 Z 位置
+        mesh.userData.originalZ = zPos;
+        
+        // 确保几何体可见
+        mesh.frustumCulled = false;
 
         scene.add(mesh);
         optionMeshes.push(mesh);
