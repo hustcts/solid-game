@@ -1,111 +1,27 @@
-// game.js - 游戏逻辑
+// game.js - 游戏核心逻辑（多模式支持）
 
 class Game {
     constructor() {
-        this.level = 1;
         this.score = 0;
-        this.currentTarget = null;
-        this.selectedShape = null;
-        this.shapes = [];
-        this.isAnimating = false;
+        this.progress = this.loadProgress();
+    }
+
+    // 添加分数
+    addScore(points) {
+        this.score += points;
+        this.updateUI();
         
-        // 关卡配置
-        this.levelConfigs = [
-            { target: 'cube', options: ['cube', 'sphere', 'cylinder'], count: 3 },
-            { target: 'sphere', options: ['sphere', 'cube', 'cone'], count: 3 },
-            { target: 'cylinder', options: ['cylinder', 'cube', 'sphere', 'cone'], count: 4 },
-            { target: 'cone', options: ['cone', 'cylinder', 'pyramid', 'cube'], count: 4 },
-            { target: 'torus', options: ['torus', 'sphere', 'cube', 'cylinder', 'cone'], count: 5 },
-            { target: 'pyramid', options: ['pyramid', 'cone', 'cube', 'cylinder', 'sphere'], count: 5 },
-            { target: 'random', options: 'all', count: 6 } // 随机挑战关
-        ];
-    }
-
-    // 初始化关卡
-    initLevel(levelNum) {
-        this.level = levelNum;
-        const config = this.getLevelConfig(levelNum);
-        
-        // 设置目标几何体
-        if (config.target === 'random') {
-            const allShapes = Shapes.getAllShapes();
-            const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
-            this.currentTarget = randomShape.type;
-        } else {
-            this.currentTarget = config.target;
-        }
-
-        // 设置选项
-        let options;
-        if (config.options === 'all') {
-            options = Shapes.getAllShapes().map(s => s.type);
-        } else {
-            options = config.options;
-        }
-
-        // 打乱选项顺序
-        options = this.shuffleArray([...options]);
-
-        return {
-            target: this.currentTarget,
-            options: options,
-            count: config.count
-        };
-    }
-
-    // 获取关卡配置
-    getLevelConfig(levelNum) {
-        if (levelNum <= this.levelConfigs.length) {
-            return this.levelConfigs[levelNum - 1];
-        }
-        // 超过预设关卡后，随机生成
-        return {
-            target: 'random',
-            options: 'all',
-            count: 6
-        };
-    }
-
-    // 选择几何体
-    selectShape(shapeType) {
-        this.selectedShape = shapeType;
-        return shapeType;
-    }
-
-    // 检查答案
-    checkAnswer(selectedType) {
-        if (selectedType === this.currentTarget) {
-            // 答对了
-            this.score += 10 * this.level; // 关卡越后分数越高
-            this.updateUI();
-            return { correct: true, score: this.score };
-        } else {
-            // 答错了
-            return { correct: false, score: this.score };
-        }
-    }
-
-    // 下一关
-    nextLevel() {
-        this.level++;
-        return this.initLevel(this.level);
+        // 保存进度
+        this.progress.totalStars = (this.progress.totalStars || 0) + Math.floor(points / 10);
+        this.progress.gamesPlayed = (this.progress.gamesPlayed || 0) + 1;
+        this.saveProgress();
     }
 
     // 更新 UI
     updateUI() {
-        const levelEl = document.getElementById('level');
         const scoreEl = document.getElementById('score');
-        
-        if (levelEl) levelEl.textContent = this.level;
-        if (scoreEl) scoreEl.textContent = this.score;
-    }
-
-    // 更新进度条
-    updateProgress(current, total) {
-        const progressFill = document.getElementById('progress-fill');
-        if (progressFill) {
-            const percentage = (current / total) * 100;
-            progressFill.style.width = percentage + '%';
+        if (scoreEl) {
+            scoreEl.textContent = this.score;
         }
     }
 
@@ -114,63 +30,105 @@ class Game {
         const messageEl = document.getElementById('message');
         const titleEl = document.getElementById('message-title');
         const contentEl = document.getElementById('message-content');
-        const btnEl = document.getElementById('message-btn');
+        const primaryBtn = document.getElementById('message-btn-primary');
+        const secondaryBtn = document.getElementById('message-btn-secondary');
 
         if (titleEl) titleEl.textContent = title;
         if (contentEl) contentEl.textContent = content;
-        if (btnEl) btnEl.textContent = btnText;
+        if (primaryBtn) primaryBtn.textContent = btnText;
+        
+        // 隐藏次要按钮
+        if (secondaryBtn) secondaryBtn.style.display = 'none';
 
         messageEl.style.display = 'block';
 
-        // 移除旧的监听器
-        const newBtn = btnEl.cloneNode(true);
-        btnEl.parentNode.replaceChild(newBtn, btnEl);
+        // 移除旧的事件监听器
+        const newBtn = primaryBtn.cloneNode(true);
+        primaryBtn.parentNode.replaceChild(newBtn, primaryBtn);
 
-        // 添加新的监听器
+        // 添加新的事件监听器
         newBtn.addEventListener('click', () => {
             messageEl.style.display = 'none';
             if (callback) callback();
         });
     }
 
-    // 显示成功动画
-    showSuccess(element) {
-        element.classList.add('success');
-        setTimeout(() => {
-            element.classList.remove('success');
-        }, 600);
-    }
-
-    // 数组乱序（Fisher-Yates 洗牌算法）
-    shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    // 返回菜单
+    returnToMenu() {
+        if (window.returnToMenu) {
+            window.returnToMenu();
         }
-        return array;
     }
 
-    // 获取当前分数
-    getScore() {
-        return this.score;
+    // 加载进度
+    loadProgress() {
+        try {
+            const saved = localStorage.getItem('solidGameProgress');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('Failed to load progress:', e);
+        }
+        return {
+            totalStars: 0,
+            totalGems: 0,
+            level: 1,
+            gamesPlayed: 0,
+            modeProgress: {}
+        };
     }
 
-    // 获取当前关卡
-    getLevel() {
-        return this.level;
+    // 保存进度
+    saveProgress() {
+        try {
+            // 计算等级
+            this.progress.level = Math.floor(this.progress.totalStars / 10) + 1;
+            this.progress.totalGems = Math.floor(this.progress.totalStars / 3);
+            
+            localStorage.setItem('solidGameProgress', JSON.stringify(this.progress));
+        } catch (e) {
+            console.error('Failed to save progress:', e);
+        }
     }
 
-    // 重置游戏
-    reset() {
-        this.level = 1;
+    // 获取进度
+    getProgress() {
+        return this.progress;
+    }
+
+    // 设置最后玩的模式
+    setLastPlayedMode(modeName) {
+        this.progress.lastMode = modeName;
+        this.saveProgress();
+    }
+
+    // 获取最后玩的模式
+    getLastPlayedMode() {
+        return this.progress.lastMode;
+    }
+
+    // 重置进度
+    resetProgress() {
+        this.progress = {
+            totalStars: 0,
+            totalGems: 0,
+            level: 1,
+            gamesPlayed: 0,
+            modeProgress: {}
+        };
         this.score = 0;
-        this.currentTarget = null;
-        this.selectedShape = null;
+        this.saveProgress();
         this.updateUI();
+    }
+
+    // 获取场景（供模式使用）
+    get scene() {
+        return window.gameDebug ? window.gameDebug.scene() : null;
     }
 }
 
-// 导出供其他模块使用
+// 导出
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Game;
 }

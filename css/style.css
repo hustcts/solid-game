@@ -1,0 +1,774 @@
+/* Solid Game - 立体几何学习游戏 样式 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    touch-action: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* 屏幕管理 */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* ========== 主菜单样式 ========== */
+
+#main-menu {
+    overflow-y: auto;
+}
+
+.menu-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.game-title {
+    font-size: 48px;
+    color: white;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-subtitle {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* 模式选择网格 */
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.mode-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.mode-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.mode-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.mode-card h3 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.mode-card p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.mode-info {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.grade-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+.difficulty {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    color: white;
+}
+
+.difficulty.easy {
+    background: #43e97b;
+}
+
+.difficulty.medium {
+    background: #f5576c;
+}
+
+.difficulty.hard {
+    background: #764ba2;
+}
+
+/* 玩家统计 */
+.player-stats {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 15px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 快捷操作 */
+.quick-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* ========== 游戏界面样式 ========== */
+
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.mode-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.header-right {
+    display: flex;
+    gap: 15px;
+}
+
+.level-badge, .score-display {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.score-display {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+/* 进度条 */
+#progress-container {
+    position: absolute;
+    top: 90px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+#progress-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+#progress-bar {
+    width: 120px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+/* 3D 画布 */
+#canvas-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(240, 244, 248, 0.5);
+    overflow: hidden;
+}
+
+#canvas-container canvas {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none;
+}
+
+/* 2D 画布 */
+#2d-canvas {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 目标区域 */
+#target-zone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    border: 4px dashed rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    z-index: 50;
+}
+
+#target-zone.active {
+    display: flex;
+}
+
+#target-label {
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 提示文字 */
+#hint-text {
+    position: absolute;
+    top: 85px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 20px;
+    border-radius: 15px;
+    font-size: 14px;
+    color: #666;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+    white-space: nowrap;
+    max-width: 90%;
+}
+
+/* 问题区域 */
+#question-area {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+    text-align: center;
+}
+
+#question-text {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* 选项容器（2D 选项） */
+#options-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 95%;
+}
+
+.option-btn {
+    width: 120px;
+    height: 120px;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    background: white;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.option-btn.selected {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
+    color: white;
+}
+
+.option-btn canvas {
+    max-width: 80px;
+    max-height: 80px;
+}
+
+/* 底部选择区（3D 选项） */
+#selection-zone {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    pointer-events: auto;
+    max-width: 95%;
+}
+
+#selection-zone.active {
+    display: flex;
+}
+
+.shape-option {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    background: white;
+}
+
+.shape-option:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.shape-option.selected {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
+    transform: scale(1.15);
+}
+
+/* 消息弹窗 */
+#message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px 60px;
+    border-radius: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 200;
+    display: none;
+    animation: popIn 0.5s ease;
+    max-width: 90%;
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+#message h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#message p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+#message-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.msg-btn {
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.msg-btn.primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.msg-btn.secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.msg-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* 答案解析 */
+#explanation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 210;
+    display: none;
+    max-width: 500px;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+#explanation h3 {
+    font-size: 22px;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+#explanation p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+#explanation-close {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* 帮助弹窗 */
+#help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 300;
+}
+
+#help-modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 500px;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    font-size: 28px;
+    color: #667eea;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.help-sections {
+    margin-bottom: 25px;
+}
+
+.help-section {
+    margin-bottom: 20px;
+}
+
+.help-section h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.help-section p {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.modal-close {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* ========== 响应式设计 ========== */
+
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 32px;
+    }
+    
+    .game-subtitle {
+        font-size: 16px;
+    }
+    
+    .mode-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #header {
+        height: 60px;
+        padding: 0 10px;
+    }
+    
+    .back-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .mode-title {
+        font-size: 14px;
+    }
+    
+    .level-badge, .score-display {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    #progress-container {
+        top: 75px;
+        right: 10px;
+        padding: 8px;
+    }
+    
+    #progress-bar {
+        width: 80px;
+    }
+    
+    #hint-text {
+        top: 75px;
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+    
+    #question-area {
+        top: 110px;
+        padding: 15px 20px;
+    }
+    
+    #question-text {
+        font-size: 16px;
+    }
+    
+    #options-container {
+        bottom: 20px;
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .option-btn {
+        width: 90px;
+        height: 90px;
+        font-size: 14px;
+    }
+    
+    #selection-zone {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .shape-option {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    #message {
+        padding: 30px 20px;
+    }
+    
+    #message h2 {
+        font-size: 24px;
+    }
+    
+    #message p {
+        font-size: 16px;
+    }
+}
+
+/* 成功动画 */
+.success {
+    animation: celebrate 0.6s ease;
+}
+
+@keyframes celebrate {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* 震动动画 */
+.shake {
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}

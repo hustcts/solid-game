@@ -1,4 +1,4 @@
-// shapes.js - 几何体定义
+// shapes.js - 几何体定义（增强版）
 
 const Shapes = {
     // 立方体
@@ -85,6 +85,20 @@ const Shapes = {
         return pyramid;
     },
 
+    // 长方体
+    createRectangular: function(color = 0x667eea) {
+        const geometry = new THREE.BoxGeometry(3, 2, 1.5);
+        const material = new THREE.MeshPhongMaterial({ 
+            color: color,
+            shininess: 100,
+            specular: 0x444444
+        });
+        const rect = new THREE.Mesh(geometry, material);
+        rect.userData.shapeType = 'rectangular';
+        rect.userData.shapeName = '长方体';
+        return rect;
+    },
+
     // 获取所有几何体类型
     getAllShapes: function() {
         return [
@@ -93,7 +107,8 @@ const Shapes = {
             { type: 'cylinder', name: '圆柱体', emoji: '🛢️', color: 0xf5576c },
             { type: 'cone', name: '圆锥体', emoji: '🎉', color: 0x4facfe },
             { type: 'torus', name: '圆环体', emoji: '🍩', color: 0x43e97b },
-            { type: 'pyramid', name: '金字塔', emoji: '🔺', color: 0xfa709a }
+            { type: 'pyramid', name: '金字塔', emoji: '🔺', color: 0xfa709a },
+            { type: 'rectangular', name: '长方体', emoji: '📐', color: 0x43e97b }
         ];
     },
 
@@ -105,13 +120,17 @@ const Shapes = {
             'cylinder': this.createCylinder,
             'cone': this.createCone,
             'torus': this.createTorus,
-            'pyramid': this.createPyramid
+            'pyramid': this.createPyramid,
+            'rectangular': this.createRectangular
         };
 
         if (shapeMap[type]) {
             return shapeMap[type].call(this, color);
         }
-        return null;
+        
+        // 默认返回立方体
+        console.warn('Unknown shape type:', type, 'using cube instead');
+        return this.createCube(color);
     }
 };
 
